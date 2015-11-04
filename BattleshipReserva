@@ -1,0 +1,142 @@
+# -*- coding: utf-8 -*-
+import os
+
+tabuleiro1=[]
+tabuleiro2=[]
+tabuleiro_player1=[]
+tabuleiro_player2=[]
+#-------------------------------------Tabuleiro 9x9
+for x in range(1,10):
+        tabuleiro1.append(["O"] * 9)
+        tabuleiro2.append(["O"] * 9)
+        tabuleiro_player1.append(["O"] * 9)
+        tabuleiro_player2.append(["O"] * 9)
+#tabuleiros dos jogadores
+def print_tabuleiro(tabuleiro,numero=""):
+    print("Tabuleiro"+str(numero))
+    for row in tabuleiro:
+        print(" ".join(row))
+
+
+def cls():
+    os.system(['clear','cls'][os.name == 'nt'])
+
+
+#Começo de jogo
+print('Vamos jogar Batalha-Naval!')
+
+#-------------------------------------Posicionamento dos Barcos
+def coordenadas_barco(tamanho,tabuleiro,numero):
+    for i in range(len(tamanho)):
+        ini=int(input("Digite onde começa o seu barco (linha e coluna, ex: '12')"))
+        ini2=int(input("Digite onde acaba seu barco"))
+
+        if abs(ini-ini2)==tamanho[i]-1 or abs(ini-ini2)==(tamanho[i]-1)*10 or ((ini-ini2)==0 and tamanho[i]==1):
+            ini=str(ini)
+            ini2=str(ini2)
+            li=int(list(ini)[0])-1
+            ci=int(list(ini)[1])-1
+            lf=int(list(ini2)[0])-1
+            cf=int(list(ini2)[1])-1
+
+            if li==lf and (cf-ci)==(tamanho[i]-1):
+                for i in range(tamanho[i]):
+                    if tabuleiro[li][ci+i]!='B':
+                        tabuleiro[li][ci+i]='B'
+                    else:
+                        print("Você não pode colocar um barco em cima de uma parte de outro")
+                        break
+
+            elif ci==cf and (lf-li)==(tamanho[i]-1):
+                for i in range(tamanho[i]):
+                    if tabuleiro[li+i][ci]!='B':
+                        tabuleiro[li+i][ci]='B'
+                    else:
+                        print("Você não pode colocar um barco em cima de uma parte de outro")
+                        break
+
+            elif li==lf and (cf-ci)==(-tamanho[i]+1):
+                for i in range(tamanho[i]):
+                    if tabuleiro[li][ci-i]!='B':
+                        tabuleiro[li][ci-i]='B'
+                    else:
+                        print("Você não pode colocar um barco em cima de uma parte de outro")
+                        break
+            elif ci==cf and li-lf==(-tamanho[i]+1):
+                for i in range(tamanho[i]):
+                    if tabuleiro[li-i][ci]!='B':
+                       tabuleiro[li-i][ci]='B'
+                    else:
+                        print("Você não pode colocar um barco em cima de uma parte de outro")
+                        break
+            else:
+                print("Por favor, escolha uma posição numa mesma linha ou numa mesma coluna")
+        else:
+            print("Opa! Esse não é o tamanho do barco! Ele tem que ter "+str(tamanho[i])+" espaços.")
+    #print_tabuleiro(tabuleiro,numero)
+
+    return None
+
+def chutes(tabuleiro,tabuleirox,placar,tamanho,numero):
+
+    chute = str(input("Chute: "))
+    chutel=int(list(chute)[0])-1
+    chutec=int(list(chute)[1])-1
+    if tabuleirox[chutel][chutec]=="B":
+        print("Você já acertou aí!")
+    elif tabuleiro[chutel][chutec]=="B":
+        print("Parabéns! Você acertou parte de uma embarcação!")
+        tabuleirox[chutel][chutec]="B"
+        print_tabuleiro(tabuleirox)
+        placar+=1
+
+        if placar==sum(tamanho):
+            print("O jogo acabou! O vencedor é o Jogador"+str(numero))
+
+        else:
+            pass
+
+    else:
+        if (chutel < 0 or chutel > 9) or (chutec < 0 or chutec > 9):
+            print("Opa! Não acertou nem a água. Lembre-se do tamanho do tabuleiro!")
+        elif(tabuleiro[chutel][chutec] == "X"):
+            print("Você já bombardeou essa água aí.")
+        else:
+            print("Água!")
+            tabuleirox[chutel][chutec] = "X"
+            print_tabuleiro(tabuleirox)
+
+    return placar
+
+#-------------------------------------Abre arquivo com tamanho dos Barcos
+tamanho=[]
+TamanhoBarcos=open("TamanhoBarcos.txt", "r")
+for i in range(3):
+    tamanho.append(int(TamanhoBarcos.readline()))
+TamanhoBarcos.close()
+
+
+#-------------------------------------Jogador1
+print("Primeiro o Jogador 1!")
+print_tabuleiro(tabuleiro1,1)
+coordenadas_barco(tamanho, tabuleiro1,1)
+#-------------------------------------Apaga Console
+cls()
+
+#-------------------------------------Jogador2
+print_tabuleiro(tabuleiro2,2)
+coordenadas_barco(tamanho, tabuleiro2,2)
+#-------------------------------------Apaga Console
+cls()
+#-------------------------------------Loop que só para quando todos os barcos forem atingidos
+placar1=0
+placar2=0
+while placar1<sum(tamanho) or placar2<sum(tamanho):
+    print("Jogador1!")
+    placar1=chutes(tabuleiro2,tabuleiro_player1,placar1,tamanho,1)
+    cls()
+    print("Jogador2!")
+    placar2=chutes(tabuleiro1,tabuleiro_player2,placar2,tamanho,2)
+    cls()
+#-------------------------------------Placar
+    print("Jogador1 "+str(placar1)+" - Jogador2 "+str(placar2))
